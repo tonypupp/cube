@@ -1,10 +1,13 @@
+
 OTHER_FILES += \
     triangle.vsh \
     triangle.fsh
 
 HEADERS += \
-    openglwindow.h
+    openglwindow.h \
+    trianglewindow.h
 
 SOURCES += \
     openglwindow.cpp \
-    main.cpp
+    main.cpp \
+    trianglewindow.cpp

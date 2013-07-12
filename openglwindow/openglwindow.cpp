@@ -4,6 +4,7 @@
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
+#include <QMouseEvent>
 
 OpenGLWindow::OpenGLWindow(QWindow *parent)
     :QWindow(parent),
@@ -53,13 +54,41 @@ void OpenGLWindow::renderLater()
 bool OpenGLWindow::event(QEvent *event)
 {
     switch (event->type()) {
+    QMouseEvent *mouse;
     case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
         return true;
+    case QEvent::MouseButtonPress:
+        mouse = static_cast<QMouseEvent *>(event);
+        mousePressEvent(mouse);
+        return true;
+    case QEvent::MouseMove:
+        mouse = static_cast<QMouseEvent *>(event);
+        mouseMoveEvent(mouse);
+        return true;
+    case QEvent::MouseButtonRelease:
+        mouse = static_cast<QMouseEvent *>(event);
+        mouseReleaseEvent(mouse);
+        return true;
     default:
         return QWindow::event(event);
     }
+}
+
+void OpenGLWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    return;
+}
+
+void OpenGLWindow::mousePressEvent(QMouseEvent *event)
+{
+    return;
+}
+
+void OpenGLWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    return;
 }
 
 void OpenGLWindow::exposeEvent(QExposeEvent *event)
