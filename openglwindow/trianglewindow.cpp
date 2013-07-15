@@ -63,18 +63,19 @@ void TriangleWindow::initialize()
     mouse_x = 0;
     mouse_y = 0;
 
-    m_frame = 0;
+    m_frame = 5;
     connect(&timer, &QTimer::timeout, this, &TriangleWindow::Ontimer);
-    timer.start(10);
+    //timer.start(10);
 }
 
 void TriangleWindow::Ontimer()
 {
-    m_frame ++;
+    m_frame = 5;
 }
 
 void TriangleWindow::mousePressEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event);
     mouse_pressed = true;
     mouse_x = event->x();
     mouse_y = event->y();
@@ -84,6 +85,7 @@ void TriangleWindow::mousePressEvent(QMouseEvent *event)
 
 void TriangleWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event);
     mouse_pressed = false;
     mouse_x = 0;
     mouse_y = 0;
@@ -118,15 +120,19 @@ void TriangleWindow::mouseMoveEvent(QMouseEvent *event)
 void TriangleWindow::render()
 {
     const qreal retinaScale = devicePixelRatio();
-    int wid = width();
-    int hei = height();
-    //glViewport(0, 0, wid * retinaScale, hei * retinaScale);
+
+    //glViewport(0, 0, width() * retinaScale, high() * retinaScale);
     glViewport(0, 0, 640, 640);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
-    glColor3i(0, 0, 0);
+    glColor3i(0, 0xffffffff, 0);
+    glShadeModel(GL_FLAT);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_CULL_FACE);
+    glPolygonMode(GL_BACK,GL_LINE);
 
-    matrix.rotate(100.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+
+    matrix.rotate(5.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
     m_program->setUniformValue(m_matrixUniform, matrix);
 
 #if 1
@@ -151,22 +157,26 @@ void TriangleWindow::render()
     };
 
     GLfloat colors[] = {
-        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
     };
 
-    glVertexAttribPointer(m_posAttr,3, GL_FLOAT,GL_FALSE, 0, vertices);
-    //glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT,GL_FALSE, 0, vertices);
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, colors);
 
     glEnableVertexAttribArray(0);
-    //glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(1);
 
-    glDrawElements(GL_TRIANGLES,
-                   36,
-                   GL_UNSIGNED_BYTE,
-                   indices);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indices);
 
     glDisableVertexAttribArray(0);
-    //glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(1);
 #else
     GLfloat vertices[] = {
         0.0f, 0.707f,

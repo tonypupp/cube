@@ -76,21 +76,6 @@ bool OpenGLWindow::event(QEvent *event)
     }
 }
 
-void OpenGLWindow::mouseMoveEvent(QMouseEvent *event)
-{
-    return;
-}
-
-void OpenGLWindow::mousePressEvent(QMouseEvent *event)
-{
-    return;
-}
-
-void OpenGLWindow::mouseReleaseEvent(QMouseEvent *event)
-{
-    return;
-}
-
 void OpenGLWindow::exposeEvent(QExposeEvent *event)
 {
     Q_UNUSED(event);
