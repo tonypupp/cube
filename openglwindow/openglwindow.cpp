@@ -5,6 +5,7 @@
 #include <QtGui/QOpenGLPaintDevice>
 #include <QtGui/QPainter>
 #include <QMouseEvent>
+#include <QWheelEvent>
 
 OpenGLWindow::OpenGLWindow(QWindow *parent)
     :QWindow(parent),
@@ -55,6 +56,7 @@ bool OpenGLWindow::event(QEvent *event)
 {
     switch (event->type()) {
     QMouseEvent *mouse;
+    QWheelEvent *ev;
     case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
@@ -71,6 +73,9 @@ bool OpenGLWindow::event(QEvent *event)
         mouse = static_cast<QMouseEvent *>(event);
         mouseReleaseEvent(mouse);
         return true;
+    case QEvent::Wheel:
+        ev = static_cast<QWheelEvent *>(event);
+        wheelEvent(ev);
     default:
         return QWindow::event(event);
     }

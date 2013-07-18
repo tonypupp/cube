@@ -3,6 +3,8 @@
 #include <QtGui/QGuiApplication>
 #include <QtGui/QScreen>
 
+#include <QWheelEvent>
+
 TriangleWindow::TriangleWindow():
     m_program(0)
     , m_frame(0)
@@ -51,13 +53,15 @@ void TriangleWindow::initialize()
     m_posAttr = m_program->attributeLocation("posAttr");
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
+    matrix.setToIdentity();
 
-    //matrix.perspective(60, 4.0/3.0, 0.1, 100.0);
-    //matrix.perspective(60, 1, 0.1, 100.0);
+#if 0
+    matrix.perspective(60, 4.0/3.0, 0.1, 100.0);
+#else
     matrix.ortho(0.0f, 6.0f, 0.0f, 6.0f, 0.1f, 100.0f);
     matrix.translate(3, 3, -10);
     matrix.rotate(-30, 1, 1, 0);
-    //matrix.rotate(30, 0, 1, 0);
+#endif
 
     mouse_pressed = false;
     mouse_x = 0;
@@ -93,6 +97,22 @@ void TriangleWindow::mouseReleaseEvent(QMouseEvent *event)
     return;
 }
 
+void TriangleWindow::wheelEvent(QWheelEvent *ev)
+{
+    QPoint degree = ev->angleDelta() / 120;
+#if 1
+    float scale = 1.0 + 0.1 * degree.y();
+    matrix.scale(scale);
+#else
+    matrix.lookAt(
+                QVector3D(-2, 0, 0),
+                QVector3D(0, 0, 1),
+                QVector3D(0, 1, 0));
+#endif
+
+    ev->accept();
+}
+
 void TriangleWindow::mouseMoveEvent(QMouseEvent *event)
 {
     int x_change;
@@ -120,22 +140,20 @@ void TriangleWindow::mouseMoveEvent(QMouseEvent *event)
 void TriangleWindow::render()
 {
     const qreal retinaScale = devicePixelRatio();
+    int w = ((width () > height()) ? height() : width()) * retinaScale;
 
-    //glViewport(0, 0, width() * retinaScale, high() * retinaScale);
-    glViewport(0, 0, 640, 640);
+    //glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+    glViewport(0, 0, w, w);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
     glColor3i(0, 0xffffffff, 0);
     glShadeModel(GL_FLAT);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_CULL_FACE);
-    glPolygonMode(GL_BACK,GL_LINE);
-
 
     matrix.rotate(5.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
     m_program->setUniformValue(m_matrixUniform, matrix);
 
-#if 1
     GLfloat vertices[] = {
         -0.5f, -0.5f, -0.5f,
         0.5f, -0.5f, -0.5f,
@@ -177,28 +195,11 @@ void TriangleWindow::render()
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-#else
-    GLfloat vertices[] = {
-        0.0f, 0.707f,
-        -0.5f, -0.5f,
-        0.5f, 0.5f
-    };
 
-    GLfloat colors[] = {
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f
-    };
-
-    glVertexAttribPointer(m_posAttr,2, GL_FLOAT, GL_FALSE, 0, vertices);
-    glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-#endif
+    glBegin(GL_LINE);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glVertex3f(10.0f, 0.0f, 0.0f);
+    glEnd();
 }
