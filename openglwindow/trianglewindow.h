@@ -7,6 +7,10 @@
 #include <QtGui/QMatrix4x4>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QList>
+
+#include "cube.h"
+#include "panel.h"
 
 class QTimer;
 class QMouseEvent;
@@ -16,34 +20,48 @@ class TriangleWindow : public OpenGLWindow
 
 public:
     TriangleWindow();
-
-    void initialize();
     void render();
+    void autorender(bool enable);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *ev);
+    void mouseDoubleClickEvent(QMouseEvent *ev);
 
 private:
-#if 0
+    friend class Cube;
+#ifdef INLINED_SHADER
     GLuint loadShader(GLuint type, const char *source);
 #endif
+    void initialize();
 
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
+
+    int m_num;
+    Cube m_cube[27];
+    void initcube();
+    void drawcube(Cube &cube, QMatrix4x4 &matrix);
+
+    Panel m_panel[AXIS_NULL];
+    void panelinit(Panel &panel, enum AXIS axis, int cube[]);
+    void initpanel(int cube_map[][9]);
+
+    void roundpanel();
+    bool m_roundpanel;
+
     bool mouse_pressed;
     int mouse_x;
     int mouse_y;
 
     QOpenGLShaderProgram *m_program;
-    QMatrix4x4 matrix;
+    QMatrix4x4 m_view;
 
     int m_frame;
     QTimer timer;
-
     void Ontimer();
 };
 

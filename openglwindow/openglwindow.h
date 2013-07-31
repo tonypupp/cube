@@ -19,6 +19,7 @@ public:
     virtual void initialize();
 
     void setAnimating(bool animating);
+    bool getAnimating();
 
 public slots:
     void renderLater();

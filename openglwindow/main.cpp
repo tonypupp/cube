@@ -17,6 +17,6 @@ int main(int argc, char **argv)
     window.resize(640, 800);
     window.show();
 
-    window.setAnimating(true);
+    window.setAnimating(false);
     return app.exec();
 }

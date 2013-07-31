@@ -56,7 +56,9 @@ bool OpenGLWindow::event(QEvent *event)
 {
     switch (event->type()) {
     QMouseEvent *mouse;
+#if 0
     QWheelEvent *ev;
+#endif
     case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
@@ -65,17 +67,7 @@ bool OpenGLWindow::event(QEvent *event)
         mouse = static_cast<QMouseEvent *>(event);
         mousePressEvent(mouse);
         return true;
-    case QEvent::MouseMove:
-        mouse = static_cast<QMouseEvent *>(event);
-        mouseMoveEvent(mouse);
-        return true;
-    case QEvent::MouseButtonRelease:
-        mouse = static_cast<QMouseEvent *>(event);
-        mouseReleaseEvent(mouse);
-        return true;
-    case QEvent::Wheel:
-        ev = static_cast<QWheelEvent *>(event);
-        wheelEvent(ev);
+
     default:
         return QWindow::event(event);
     }
@@ -125,4 +117,9 @@ void OpenGLWindow::setAnimating(bool animating)
 
     if (animating)
         renderLater();
+}
+
+bool OpenGLWindow::getAnimating()
+{
+    return m_animating;
 }
