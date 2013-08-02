@@ -14,6 +14,10 @@ public:
     Cube();
     Cube(float x, float y, float z);
 
+    static GLuint getvertices(GLfloat **vertices);
+    static GLuint getindicies(GLubyte **indices);
+    static GLuint getcolors(GLfloat **colors);
+
     void setcolor(float color[32]);
     void translation(float x, float y, float z);
     void rotate(float angle, float x, float y, float z);
@@ -36,9 +40,11 @@ private:
     int no;
     QMatrix4x4 m_view;
     QMatrix4x4 m_mode;
-    GLfloat m_vertices[24];
-    GLfloat m_colors[32];
-    GLubyte m_indices[36];
+
+    GLfloat *m_vertices;
+    GLfloat *m_colors;
+    GLubyte *m_indices;
+
     QVector4D m_pos;
 };
 

@@ -2,47 +2,45 @@
 #include "panel.h"
 #include "trianglewindow.h"
 
+GLfloat gvertices[] = {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+};
+
+GLubyte gindices[] = {
+    0,1,2, 2,3,0, //front side
+    5,6,2, 5,2,1, //right side
+    4,3,7, 4,0,3, //left side
+    0,5,1, 0,4,5, //bottom side
+    3,2,6, 3,6,7, //up side
+    5,7,6, 5,4,7, //back side
+};
+
+GLfloat gcolors[] = {
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+};
+
 Cube::Cube()
 {
     m_mode.setToIdentity();
     m_view.setToIdentity();
-    GLfloat vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-    };
-    memset(m_vertices, 0, sizeof(vertices));
-    memcpy(m_vertices, vertices, sizeof(vertices));
 
-
-    GLfloat colors[] = {
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-    };
-    memset(m_colors, 0.0, sizeof(colors));
-    memcpy(m_colors, colors, sizeof(colors));
-
-    GLubyte indices[] = {
-        0,1,2, 2,3,0, //front side
-        5,6,2, 5,2,1, //right side
-        4,3,7, 4,0,3, //left side
-        0,5,1, 0,4,5, //bottom side
-        3,2,6, 3,6,7, //up side
-        5,7,6, 5,4,7, //back side
-    };
-    memset(m_indices, 0, sizeof(indices));
-    memcpy(m_indices, indices, sizeof(indices));
+    m_vertices = gvertices;
+    m_colors = gcolors;
+    m_indices = gindices;
 }
 
 Cube::Cube(float x, float y, float z)
@@ -50,6 +48,24 @@ Cube::Cube(float x, float y, float z)
     Cube();
     m_mode.translate(x, y, z);
     setpos(x, y, z);
+}
+
+GLuint Cube::getvertices(GLfloat **vertices)
+{
+    *vertices = gvertices;
+    return sizeof(gvertices);
+}
+
+GLuint Cube::getindicies(GLubyte **indices)
+{
+    *indices = gindices;
+    return sizeof(gindices);
+}
+
+GLuint Cube::getcolors(GLfloat **colors)
+{
+    *colors = gcolors;
+    return sizeof(gcolors);
 }
 
 void Cube::setcolor(float color[])

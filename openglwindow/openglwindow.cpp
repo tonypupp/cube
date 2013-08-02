@@ -55,17 +55,9 @@ void OpenGLWindow::renderLater()
 bool OpenGLWindow::event(QEvent *event)
 {
     switch (event->type()) {
-    QMouseEvent *mouse;
-#if 0
-    QWheelEvent *ev;
-#endif
     case QEvent::UpdateRequest:
         m_update_pending = false;
         renderNow();
-        return true;
-    case QEvent::MouseButtonPress:
-        mouse = static_cast<QMouseEvent *>(event);
-        mousePressEvent(mouse);
         return true;
 
     default:

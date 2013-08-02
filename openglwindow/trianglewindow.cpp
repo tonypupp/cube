@@ -217,6 +217,54 @@ void TriangleWindow::initialize()
     m_colAttr = m_program->attributeLocation("colAttr");
     m_matrixUniform = m_program->uniformLocation("matrix");
 
+#ifdef VBO
+    glGenBuffers(1, &m_elementbuffer);
+    if (m_elementbuffer == 0)
+        ;
+    else {
+        GLuint size;
+        GLubyte *indices;
+
+        size = Cube::getindicies(&indices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+    }
+
+    glGenBuffers(1, &m_vbo);
+    if (m_vbo == 0)
+        ;
+    else {
+        GLuint size;
+        GLfloat *vertices;
+
+        size = Cube::getvertices(&vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+    }
+#ifdef RAW_OPENGL
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+#else
+    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3);
+#endif
+
+    glGenBuffers(1, &m_color);
+    if (m_color == 0)
+        ;
+    else{
+        GLuint size;
+        GLfloat *color;
+
+        size = Cube::getcolors(&color);
+        glBindBuffer(GL_ARRAY_BUFFER, m_color);
+        glBufferData(GL_ARRAY_BUFFER, size, color, GL_STATIC_DRAW);
+    }
+#ifdef RAW_OPENGL
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+#else
+    m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
+#endif
+#endif //VBO
+
     m_view.setToIdentity();
 #if 0
     m_view.perspective(60, 4.0/3.0, 0.1, 100.0);
@@ -316,31 +364,75 @@ void TriangleWindow::roundpanel()
             m_panel[i].rotatend(this);
 }
 
-void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &view)
+#ifndef VBO
+void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
 {
-    QMatrix4x4 modeview = view * cube.getmatrix();
+    QMatrix4x4 modeview = matrix * cube.getmatrix();
     m_program->setUniformValue(m_matrixUniform, modeview);
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT,GL_FALSE, 0, cube.m_vertices);
-    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, cube.m_colors);
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+#ifdef RAW_OPENGL
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, cube.m_vertices);
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, cube.m_colors);
+    glEnableVertexAttribArray(m_posAttr);
+    glEnableVertexAttribArray(m_colAttr);
+#else
+    m_program->setAttributeArray(m_posAttr, cube.m_vertices, 3);
+    m_program->setAttributeArray(m_colAttr, cube.m_colors, 4);
+    m_program->enableAttributeArray(m_posAttr);
+    m_program->enableAttributeArray(m_colAttr);
+#endif
 
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cube.m_indices);
 
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-
+#ifdef RAW_OPENGL
+    glDisableVertexAttribArray(m_posAttr);
+    glDisableVertexAttribArray(m_colAttr);
+#else
+    m_program->disableAttributeArray(m_posAttr);
+    m_program->disableAttributeArray(m_colAttr);
+#endif
 }
+
+#else
+void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
+{
+    QMatrix4x4 modeview = matrix * cube.getmatrix();
+    m_program->setUniformValue(m_matrixUniform, modeview);
+
+#ifdef RAW_OPENGL
+    glEnableVertexAttribArray(m_posAttr);
+    glEnableVertexAttribArray(m_colAttr);
+#else
+    m_program->enableAttributeArray(m_posAttr);
+    m_program->enableAttributeArray(m_colAttr);
+#endif
+
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+
+#ifdef RAW_OPENGL
+    glDisableVertexAttribArray(m_posAttr);
+    glDisableVertexAttribArray(m_colAttr);
+#else
+    m_program->disableAttributeArray(m_posAttr);
+    m_program->disableAttributeArray(m_colAttr);
+#endif
+}
+#endif //VBO
 
 void TriangleWindow::render()
 {
-    int i = 0;
+    int i;
     const qreal retinaScale = devicePixelRatio();
+#if 0
     int w = ((width () > height()) ? height() : width()) * retinaScale;
+#else
+    int w = width();
+    int h = height();
+    w = ((w > h) ? h : w) *retinaScale;
+#endif
     static Panel *panel = &m_panel[AXIS_Z1];
 
-    glViewport(0, 0, w, w);
+    glViewport(0, 0, w/2, w/2);
     //glViewport(0, 0, 1600, 1600);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
@@ -349,7 +441,9 @@ void TriangleWindow::render()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_CULL_FACE);
 
+#if 0
     m_view.rotate(5.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
+#endif
 
     if (m_roundpanel){
 #if 0
@@ -367,10 +461,18 @@ void TriangleWindow::render()
         //rotate_panel(m_panel[AXIS_Z][1], 5);
         panel->rotate(5);
     }
-
-    for (;i < m_num; i++) {
+#if 1
+    for (i = 0; i < m_num; i++) {
         drawcube(m_cube[i], m_view);
     }
+#endif
+
+#if 1
+    glViewport(320, 320, w/2, w/2);
+    for (i = 0 ;i < m_num; i++) {
+        drawcube(m_cube[i], m_view);
+    }
+#endif
 }
 
 void TriangleWindow::Ontimer()
@@ -380,11 +482,11 @@ void TriangleWindow::Ontimer()
 
 void TriangleWindow::mousePressEvent(QMouseEvent *event)
 {
-    Q_UNUSED(event);
     mouse_pressed = true;
     mouse_x = event->x();
     mouse_y = event->y();
-    return;
+
+    event->accept();
 }
 
 void TriangleWindow::mouseReleaseEvent(QMouseEvent *event)
@@ -398,7 +500,7 @@ void TriangleWindow::mouseReleaseEvent(QMouseEvent *event)
         renderNow();
     }
 
-    return;
+    event->accept();
 }
 
 void TriangleWindow::wheelEvent(QWheelEvent *ev)
@@ -414,6 +516,8 @@ void TriangleWindow::wheelEvent(QWheelEvent *ev)
                 QVector3D(0, 1, 0));
 #endif
 
+    if (!getAnimating())
+        QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
     ev->accept();
 }
 
@@ -434,22 +538,44 @@ void TriangleWindow::mouseMoveEvent(QMouseEvent *event)
 
     x_angle = (float)(x_change) * 180.0f / (float)width();
     y_angle = (float)(y_change)  * 180.0f / (float)height();
-    m_view.rotate(x_angle, 0, 1, 0);
-    m_view.rotate(y_angle, 1, 0, 0);
+    m_view.rotate(-x_angle, 0, 1, 0);
+    m_view.rotate(-y_angle, 1, 0, 0);
 
     if (!getAnimating())
         QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
-    return;
+
+    event->accept();
 }
 
 void TriangleWindow::mouseDoubleClickEvent(QMouseEvent *ev)
 {
-    Q_UNUSED(ev);
-
     if (getAnimating())
         setAnimating(false);
     else
         setAnimating(true);
+
+    ev->accept();
+}
+
+void TriangleWindow::keyPressEvent(QKeyEvent *ke)
+{
+    Qt::Key key = static_cast<Qt::Key>(ke->key());
+
+    if (key == Qt::Key_Left)
+        m_view.rotate(-5.0f, 0, 1, 0);
+    else if (key == Qt::Key_Right)
+        m_view.rotate(5.0f, 0, 1, 0);
+    else if (key == Qt::Key_Up)
+        m_view.rotate(-5.0f, 1, 0, 0);
+    else if (key == Qt::Key_Down)
+        m_view.rotate(5.0f, 1, 0, 0);
+    else
+        return QWindow::keyPressEvent(ke);
+
+    if (!getAnimating())
+        QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
+
+    ke->accept();
 }
 
 void TriangleWindow::autorender(bool enable)

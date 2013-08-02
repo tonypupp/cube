@@ -15,6 +15,9 @@
 class QTimer;
 class QMouseEvent;
 
+#define VBO
+//#define RAW_OPENGL
+
 class TriangleWindow : public OpenGLWindow
 {
 
@@ -24,6 +27,7 @@ public:
     void autorender(bool enable);
 
 protected:
+    void keyPressEvent(QKeyEvent *);
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -40,6 +44,10 @@ private:
     GLuint m_posAttr;
     GLuint m_colAttr;
     GLuint m_matrixUniform;
+
+    GLuint m_vbo;
+    GLuint m_elementbuffer;
+    GLuint m_color;
 
     int m_num;
     Cube m_cube[27];
