@@ -2,7 +2,9 @@
 OTHER_FILES += \
     triangle.vsh \
     plain.vsh \
-    plain.fsh
+    plain.fsh \
+    texture.fsh \
+    texture.vsh
 
 HEADERS += \
     openglwindow.h \
@@ -16,3 +18,7 @@ SOURCES += \
     trianglewindow.cpp \
     cube.cpp \
     panel.cpp
+
+RESOURCES += \
+    shader.qrc \
+    texture.qrc

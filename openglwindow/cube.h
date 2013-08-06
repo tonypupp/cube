@@ -2,6 +2,7 @@
 #define CUBE_H
 
 #include <QtGui/QOpenGLFunctions>
+#include <QVector2D>
 #include <QVector4D>
 
 #include "panel.h"
@@ -17,6 +18,7 @@ public:
     static GLuint getvertices(GLfloat **vertices);
     static GLuint getindicies(GLubyte **indices);
     static GLuint getcolors(GLfloat **colors);
+    static GLuint gettexcoords(QVector2D **texcoords);
 
     void setcolor(float color[32]);
     void translation(float x, float y, float z);

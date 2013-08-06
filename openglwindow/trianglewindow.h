@@ -45,9 +45,14 @@ private:
     GLuint m_colAttr;
     GLuint m_matrixUniform;
 
-    GLuint m_vbo;
+    GLuint m_vbo[2];
     GLuint m_elementbuffer;
-    GLuint m_color;
+    //GLuint m_color;
+    GLuint m_texcoord;
+    GLuint m_feedbackbuffer;
+    void initshaders();
+    GLuint m_texture;
+    void inittexture();
 
     int m_num;
     Cube m_cube[27];

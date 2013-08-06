@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>plain.fsh</file>
+        <file>plain.vsh</file>
+        <file>texture.fsh</file>
+        <file>texture.vsh</file>
+    </qresource>
+</RCC>

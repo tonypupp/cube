@@ -14,12 +14,124 @@ GLfloat gvertices[] = {
 };
 
 GLubyte gindices[] = {
+#if 0
     0,1,2, 2,3,0, //front side
     5,6,2, 5,2,1, //right side
     4,3,7, 4,0,3, //left side
     0,5,1, 0,4,5, //bottom side
     3,2,6, 3,6,7, //up side
     5,7,6, 5,4,7, //back side
+#else
+    0,1,2, 2,3,0, //front side
+    1,5,6, 6,2,1, //right side
+    4,0,3, 3,7,4, //left side
+    0,2,5, 5,1,0, //bottom side
+    3,2,6, 6,7,3, //up side
+    5,4,7, 7,6,5, //back side
+
+#endif
+};
+
+QVector2D texcoords[] = {
+#if 0
+    /* Cube 1 */
+    /* face front */
+    QVector2D(0.0, 0.5),  // v0
+    QVector2D(0.33, 0.5), // v1
+    QVector2D(0.33, 0.0), // v2
+    QVector2D(0.33, 0.0), // v2
+    QVector2D(0.0, 0.0),  // v3
+    QVector2D(0.0, 0.5),  // v0
+
+    /* face right */
+    QVector2D(0.66, 0.5), // v5
+    QVector2D(0.66, 0.0), // v6
+    QVector2D(0.33, 0.0), // v2
+    QVector2D(0.66, 0.5), // v5
+    QVector2D(0.33, 0.0), // v2
+    QVector2D(0.33, 0.5), // v1
+
+    /* face left */
+    QVector2D(0.33, 1.0), // v4
+    QVector2D(0.0 , 0.5), // v3
+    QVector2D(0.33, 0.5), // v7
+    QVector2D(0.33, 1.0), // v4
+    QVector2D(0.0, 1.0),  // v0
+    QVector2D(0.0, 0.5),  // v3
+
+    /* face bottom */
+    QVector2D(0.33, 0.5), // v0
+    QVector2D(0.66, 1.0), // v5
+    QVector2D(0.66, 0.5), // v1
+    QVector2D(1.0, 0.5),  // v0
+    QVector2D(0.33, 1.0), // v4
+    QVector2D(0.66, 1.0), // v5
+
+    /* face up */
+    QVector2D(0.66, 1.0), // v3
+    QVector2D(1.0, 1.0), // v2
+    QVector2D(1.0, 0.5), // v6
+    QVector2D(0.66, 1.0), // v3
+    QVector2D(1.0, 0.5), // v6
+    QVector2D(0.66, 0.5), // v7
+
+    /* face back */
+    QVector2D(1.0, 0.5), // v5
+    QVector2D(0.33, 0.0), // v7
+    QVector2D(1.0, 0.0), // v6
+    QVector2D(1.0, 0.5), // v5
+    QVector2D(0.66, 0.5), // v4
+    QVector2D(0.66, 0.0), // v7
+#else
+    /* Cube 1 */
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+
+    /* face front */
+    QVector2D(1.0, 0.0), // v0
+    QVector2D(1.0, 1.0), // v1
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(1.0, 0.0), // v2
+    QVector2D(0.0, 0.0), // v3
+    QVector2D(1.0, 0.0), // v0
+#endif
 };
 
 GLfloat gcolors[] = {
@@ -66,6 +178,12 @@ GLuint Cube::getcolors(GLfloat **colors)
 {
     *colors = gcolors;
     return sizeof(gcolors);
+}
+
+GLuint Cube::gettexcoords(QVector2D **texcoord)
+{
+    *texcoord = texcoords;
+    return sizeof(texcoords);
 }
 
 void Cube::setcolor(float color[])
