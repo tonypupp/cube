@@ -17,7 +17,7 @@ class QMouseEvent;
 
 #define VBO
 //#define RAW_OPENGL
-
+//#define TEXTURE
 class TriangleWindow : public OpenGLWindow
 {
 
@@ -76,6 +76,8 @@ private:
     int m_frame;
     QTimer timer;
     void Ontimer();
+
+    void coordinate(QMatrix4x4 matrix);
 };
 
 #endif // TRIANGLEWINDOW_H

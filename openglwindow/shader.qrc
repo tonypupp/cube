@@ -4,5 +4,7 @@
         <file>plain.vsh</file>
         <file>texture.fsh</file>
         <file>texture.vsh</file>
+        <file>coordinator.fsh</file>
+        <file>coordinator.vsh</file>
     </qresource>
 </RCC>

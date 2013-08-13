@@ -4,7 +4,9 @@ OTHER_FILES += \
     plain.vsh \
     plain.fsh \
     texture.fsh \
-    texture.vsh
+    texture.vsh \
+    coordinator.vsh \
+    coordinator.fsh
 
 HEADERS += \
     openglwindow.h \

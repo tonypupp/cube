@@ -207,13 +207,12 @@ void TriangleWindow::inittexture()
 {
     glEnable(GL_TEXTURE_2D);
     //QImage tex(":/cube.png");
-    QImage tex("../openglwindow/bullet_sq.png");
-    if (tex.isNull()) {
+    QImage texture("../openglwindow/red_640x640.png");
+    if (texture.isNull()) {
         return;
     }
-    QImage texture(tex.convertToFormat(QImage::Format_RGB888));
-
-    //texture = bindTexture(QImage(":/cube.png"));
+    //QImage texture(tex.convertToFormat(QImage::Format_RGB888));
+    //QImage texture(tex);
 
     GLsizei width = texture.width();
     GLsizei height = texture.height();
@@ -241,31 +240,26 @@ void TriangleWindow::initshaders()
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
 #else
-    //m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/plain.vsh");
-    //m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/plain.fsh");
+#ifndef TEXTURE
+    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/plain.vsh");
+    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/plain.fsh");
+#else
     m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/texture.vsh");
     m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/texture.fsh");
+#endif
 #endif
     m_program->link();
     m_program->bind();
 
     m_posAttr = m_program->attributeLocation("posAttr");
-    //m_colAttr = m_program->attributeLocation("colAttr");
+#ifndef TEXTURE
+    m_colAttr = m_program->attributeLocation("colAttr");
+#else
     m_texcoord = m_program->attributeLocation("qt_MultiTexCoord0");
+#endif
     m_matrixUniform = m_program->uniformLocation("matrix");
 
 #ifdef VBO
-    glGenBuffers(1, &m_elementbuffer);
-    if (m_elementbuffer == 0)
-        ;
-    else {
-        GLuint size;
-        GLubyte *indices;
-
-        size = Cube::getindicies(&indices);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
-    }
 
     glGenBuffers(2, m_vbo);
     if (m_vbo[0] == 0)
@@ -279,6 +273,7 @@ void TriangleWindow::initshaders()
         glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
     }
 
+#ifdef TEXTURE
     if (m_vbo[1] == 0)
         ;
     else {
@@ -290,13 +285,48 @@ void TriangleWindow::initshaders()
         glBufferData(GL_ARRAY_BUFFER, size, texcoord, GL_STATIC_DRAW);
 
     }
+#else
+    if (m_vbo[1] == 0)
+        ;
+    else {
+        GLuint size;
+        GLfloat *color;
+
+        size = Cube::getcolors(&color);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo[1]);
+        glBufferData(GL_ARRAY_BUFFER, size, color, GL_STATIC_DRAW);
+
+    }
+#endif
 
 #ifdef RAW_OPENGL
     glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+#ifndef TEXTURE
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
 #else
-    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3);
-    m_program->setAttributeArray(m_texcoord, static_cast<GLfloat *>(0), 2);
+    m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
 #endif
+#else //RAW_OPEN
+    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3);
+#ifdef TEXTURE
+    m_program->setAttributeArray(m_texcoord, static_cast<GLfloat *>(0), 2);
+#else
+    m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
+#endif
+
+    glGenBuffers(1, &m_elementbuffer);
+    if (m_elementbuffer == 0)
+        ;
+    else {
+        GLuint size;
+        GLubyte *indices;
+
+        size = Cube::getindicies(&indices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
+    }
+
+#endif //RAW_OPEN
 /*
     glGenBuffers(1, &m_color);
     if (m_color == 0)
@@ -317,8 +347,6 @@ void TriangleWindow::initshaders()
     //m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
 #endif
 
-
-
     glGenBuffers(1, &m_feedbackbuffer);
     if (m_feedbackbuffer == 0)
         ;
@@ -334,14 +362,16 @@ void TriangleWindow::initshaders()
 void TriangleWindow::initialize()
 {
     initshaders();
+#ifdef TEXTURE
     inittexture();
+#endif
     m_view.setToIdentity();
 #if 0
     m_view.perspective(60, 4.0/3.0, 0.1, 100.0);
 #else
-    m_view.ortho(-6.0f, 6.0f, -6.0f, 6.0f, -100.0f, 100.0f);
-    m_view.translate(0, 0, -10);
-    m_view.rotate(-30, 1, 1, 0);
+    m_view.ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 10.0f);
+    //m_view.translate(0, 0, -10);
+    //m_view.rotate(-30, 1, 1, 0);
 #endif
 
     m_num = 27;
@@ -474,19 +504,25 @@ void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
     glEnableVertexAttribArray(m_colAttr);
 #else
     m_program->enableAttributeArray(m_posAttr);
-    //m_program->enableAttributeArray(m_colAttr);
+#ifndef TEXTURE
+    m_program->enableAttributeArray(m_colAttr);
+#else
     m_program->enableAttributeArray(m_texcoord);
 #endif
+#endif
 
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, (GLvoid *)0);
 
 #ifdef RAW_OPENGL
     glDisableVertexAttribArray(m_posAttr);
     glDisableVertexAttribArray(m_colAttr);
 #else
     m_program->disableAttributeArray(m_posAttr);
-    //m_program->disableAttributeArray(m_colAttr);
+#ifndef TEXTURE
+    m_program->disableAttributeArray(m_colAttr);
+#else
     m_program->disableAttributeArray(m_texcoord);
+#endif
 #endif
 }
 #endif //VBO
@@ -508,10 +544,12 @@ void TriangleWindow::render()
     //glViewport(0, 0, 1600, 1600);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
-    glColor3i(0, 0xffffffff, 0);
     glShadeModel(GL_FLAT);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_CULL_FACE);
+#ifndef TEXTURE
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+#endif
+    //glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
 
 #if 0
     m_view.rotate(5.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
@@ -533,11 +571,11 @@ void TriangleWindow::render()
         //rotate_panel(m_panel[AXIS_Z][1], 5);
         panel->rotate(5);
     }
-#if 1
-    for (i = 0; i < m_num; i++) {
+
+    //for (i = 0; i < m_num; i++) {
+    for (i = 0; i < 1; i++) {
         drawcube(m_cube[i], m_view);
     }
-#endif
 
 #if 0
     glViewport(320, 320, w/2, w/2);
@@ -545,6 +583,8 @@ void TriangleWindow::render()
         drawcube(m_cube[i], m_view);
     }
 #endif
+    glFinish();
+ //   coordinate(m_view);
 }
 
 void TriangleWindow::Ontimer()
@@ -641,6 +681,10 @@ void TriangleWindow::keyPressEvent(QKeyEvent *ke)
         m_view.rotate(-5.0f, 1, 0, 0);
     else if (key == Qt::Key_Down)
         m_view.rotate(5.0f, 1, 0, 0);
+    else if (key == Qt::Key_Z)
+        m_view.rotate(-5.0f, 0, 0, 1);
+    else if (key == Qt::Key_A)
+        m_view.rotate(5.0, 0, 0, 1);
     else
         return QWindow::keyPressEvent(ke);
 
@@ -656,4 +700,55 @@ void TriangleWindow::autorender(bool enable)
         setAnimating(true);
     else
         setAnimating(false);
+}
+
+void TriangleWindow::coordinate(QMatrix4x4 matrix)
+{
+    QOpenGLShaderProgram program;
+    GLfloat linewidth;
+
+    GLfloat cor_pos[] ={
+        0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, -2.0f,
+    };
+    GLfloat cor_col[] = {
+        1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f,
+    };
+    /* First released m_program */
+    //m_program->release();
+
+    program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/coordinator.vsh");
+    program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/coordinator.fsh");
+    program.link();
+    program.bind();
+#if 1
+    program.setAttributeArray("pos", cor_pos, 3);
+    program.setAttributeArray("col", cor_col, 4);
+    //matrix.translate(-5, -5);
+    program.setUniformValue("cor_matrix", matrix);
+
+    program.enableAttributeArray("col");
+    program.enableAttributeArray("pos");
+
+    glGetFloatv(GL_LINE_WIDTH, &linewidth);
+    glLineWidth(100.0f);
+    glDrawArrays(GL_LINES, 0, 6);
+    glLineWidth(linewidth);
+
+    program.disableAttributeArray("pos");
+    program.disableAttributeArray("col");
+#endif
+    program.release();
+
+    /* Rebind m_program at the end */
+    //m_program->bind();
 }
