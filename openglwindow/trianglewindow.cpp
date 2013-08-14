@@ -96,7 +96,7 @@ void TriangleWindow::initcube()
     m_cube[6].translation(-1, -1, 1);
     m_cube[7].translation(-1, 0, 1);
     m_cube[8].translation(-1, 1, 1);
-#if 1
+#ifndef VBO
     for (int i = 0; i < 9; i++)
         m_cube[i].setcolor(red);
 #endif
@@ -120,7 +120,7 @@ void TriangleWindow::initcube()
     m_cube[15].translation(0, -1, 1);
     m_cube[16].translation(0, 0, 1);
     m_cube[17].translation(0, 1, 1);
-#if 1
+#ifndef VBO
     for (int i = 0; i < 9; i++)
         m_cube[9 + i].setcolor(green);
 #endif
@@ -260,13 +260,12 @@ void TriangleWindow::initshaders()
     m_matrixUniform = m_program->uniformLocation("matrix");
 
 #ifdef VBO
-
     glGenBuffers(2, m_vbo);
     if (m_vbo[0] == 0)
         ;
     else {
         GLuint size;
-        GLfloat *vertices;
+        struct VertexData *vertices;
 
         size = Cube::getvertices(&vertices);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
@@ -285,35 +284,24 @@ void TriangleWindow::initshaders()
         glBufferData(GL_ARRAY_BUFFER, size, texcoord, GL_STATIC_DRAW);
 
     }
-#else
-    if (m_vbo[1] == 0)
-        ;
-    else {
-        GLuint size;
-        GLfloat *color;
-
-        size = Cube::getcolors(&color);
-        glBindBuffer(GL_ARRAY_BUFFER, m_vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, size, color, GL_STATIC_DRAW);
-
-    }
 #endif
 
 #ifdef RAW_OPENGL
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, sizeof(struct VertexData), static_cast<GLfloat *>(0));
 #ifndef TEXTURE
-    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, sizeof(struct VertexData), (const void *)(sizeof(GLfloat)*3));
 #else
     m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
-#endif
+#endif //TEXTURE
 #else //RAW_OPEN
-    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3);
+    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, sizeof(struct VertexData));
 #ifdef TEXTURE
     m_program->setAttributeArray(m_texcoord, static_cast<GLfloat *>(0), 2);
 #else
-    m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
+    m_program->setAttributeArray(m_colAttr, (const GLfloat *)(12), 4, sizeof(struct VertexData));
 #endif
 
+#if 1
     glGenBuffers(1, &m_elementbuffer);
     if (m_elementbuffer == 0)
         ;
@@ -325,7 +313,7 @@ void TriangleWindow::initshaders()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
     }
-
+#endif
 #endif //RAW_OPEN
 /*
     glGenBuffers(1, &m_color);
@@ -504,26 +492,26 @@ void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
     glEnableVertexAttribArray(m_colAttr);
 #else
     m_program->enableAttributeArray(m_posAttr);
-#ifndef TEXTURE
-    m_program->enableAttributeArray(m_colAttr);
-#else
+#ifdef TEXTURE
     m_program->enableAttributeArray(m_texcoord);
-#endif
-#endif
+#else
+    m_program->enableAttributeArray(m_colAttr);
+#endif //TEXTURE
+#endif //RAW_OPENGL
 
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, (GLvoid *)0);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (GLvoid *)0);
 
 #ifdef RAW_OPENGL
     glDisableVertexAttribArray(m_posAttr);
     glDisableVertexAttribArray(m_colAttr);
 #else
     m_program->disableAttributeArray(m_posAttr);
-#ifndef TEXTURE
-    m_program->disableAttributeArray(m_colAttr);
-#else
+#ifdef TEXTURE
     m_program->disableAttributeArray(m_texcoord);
-#endif
-#endif
+#else
+    m_program->disableAttributeArray(m_colAttr);
+#endif //TEXTURE
+#endif //RAW_OPENGL
 }
 #endif //VBO
 
@@ -548,7 +536,7 @@ void TriangleWindow::render()
 #ifndef TEXTURE
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
 
 #if 0
@@ -573,7 +561,7 @@ void TriangleWindow::render()
     }
 
     //for (i = 0; i < m_num; i++) {
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < m_num; i++) {
         drawcube(m_cube[i], m_view);
     }
 

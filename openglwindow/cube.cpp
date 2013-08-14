@@ -2,6 +2,43 @@
 #include "panel.h"
 #include "trianglewindow.h"
 
+#ifdef VBO
+VertexData gvertices[] = {
+    {
+        {-1.0f, -1.0f, 1.0f,},
+        { 0.0f,  0.0f, 1.0f, 0.0f,},
+    },
+    {
+        {1.0f, -1.0f, 1.0f,},
+        {0.0f,  0.0f, 1.0f, 0.0f,},
+    },
+    {
+        {1.0f, 1.0f, 1.0f,},
+        {0.0f, 0.0f, 1.0f, 0.0f,},
+    },
+    {
+        {-1.0f, 1.0f, 1.0f,},
+        { 0.0f, 0.0f, 1.0f, 0.0f,},
+    },
+    {
+        {-1.0f, -1.0f, -1.0f,},
+        { 0.0f,  0.0f,  1.0f, 0.0f,},
+    },
+     {
+        {1.0f, -1.0f, -1.0f,},
+        {0.0f,  0.0f,  1.0f, 0.0f,},
+    },
+    {
+        {1.0f, 1.0f, -1.0f,},
+        {0.0f, 0.0f,  1.0f, 0.0f,},
+    },
+    {
+        {-1.0f, 1.0f, -1.0f,},
+        { 0.0f, 0.0f,  1.0f, 0.0f,},
+    },
+};
+
+#else
 GLfloat gvertices[] = {
     -1.0f, -1.0f,  1.0f,
      1.0f, -1.0f,  1.0f,
@@ -10,11 +47,23 @@ GLfloat gvertices[] = {
     -1.0f, -1.0f, -1.0f,
      1.0f, -1.0f, -1.0f,
      1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f
+    -1.0f,  1.0f, -1.0f,
 };
 
+GLfloat gcolors[] = {
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+};
+#endif //VBO
+
 GLubyte gindices[] = {
-#if 1
+#if 0
     1,2,3, 1,2,3,
 #else
     0,1,2, 2,3,0, //front side
@@ -77,24 +126,15 @@ QVector2D texcoords[] = {
     QVector2D(1.0, 0.0), // v0
 };
 
-GLfloat gcolors[] = {
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-};
-
 Cube::Cube()
 {
     m_mode.setToIdentity();
     m_view.setToIdentity();
 
-    m_vertices = gvertices;
+#ifndef VBO
     m_colors = gcolors;
+    m_vertices = gvertices;
+#endif
     m_indices = gindices;
 }
 
@@ -104,10 +144,13 @@ Cube::Cube(float x, float y, float z)
     m_mode.translate(x, y, z);
     setpos(x, y, z);
 }
-
+#ifdef VBO
+GLuint Cube::getvertices(struct VertexData **vertices)
+#else
 GLuint Cube::getvertices(GLfloat **vertices)
+#endif
 {
-    *vertices = gvertices;
+    *vertices = &gvertices[0];
     return sizeof(gvertices);
 }
 
@@ -117,11 +160,13 @@ GLuint Cube::getindicies(GLubyte **indices)
     return sizeof(gindices);
 }
 
+#ifndef VBO
 GLuint Cube::getcolors(GLfloat **colors)
 {
     *colors = gcolors;
     return sizeof(gcolors);
 }
+#endif
 
 GLuint Cube::gettexcoords(QVector2D **texcoord)
 {
@@ -129,10 +174,12 @@ GLuint Cube::gettexcoords(QVector2D **texcoord)
     return sizeof(texcoords);
 }
 
+#ifndef VBO
 void Cube::setcolor(float color[])
 {
     memcpy(m_colors, color, sizeof(m_colors));
 }
+#endif
 
 void Cube::translation(float x, float y, float z)
 {

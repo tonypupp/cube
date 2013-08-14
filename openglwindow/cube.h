@@ -8,6 +8,14 @@
 #include "panel.h"
 
 class TriangleWindow;
+#define VBO
+#ifdef VBO
+struct VertexData
+{
+    GLfloat vertex[3];
+    GLfloat color[4];
+};
+#endif
 
 class Cube
 {
@@ -15,12 +23,18 @@ public:
     Cube();
     Cube(float x, float y, float z);
 
-    static GLuint getvertices(GLfloat **vertices);
     static GLuint getindicies(GLubyte **indices);
+#ifdef VBO
+    static GLuint getvertices(struct VertexData **vertices);
+#else
     static GLuint getcolors(GLfloat **colors);
+    static GLuint getvertices(GLfloat **vertices);
+#endif
     static GLuint gettexcoords(QVector2D **texcoords);
 
+#ifndef VBO
     void setcolor(float color[32]);
+#endif
     void translation(float x, float y, float z);
     void rotate(float angle, float x, float y, float z);
 
@@ -43,8 +57,13 @@ private:
     QMatrix4x4 m_view;
     QMatrix4x4 m_mode;
 
+#ifdef VBO
+    struct VertexDate *m_vertices;
+#else
     GLfloat *m_vertices;
     GLfloat *m_colors;
+#endif
+
     GLubyte *m_indices;
 
     QVector4D m_pos;
