@@ -3,6 +3,7 @@
 
 #include <QtGui/QOpenGLFunctions>
 #include <QVector2D>
+#include <QVector3D>
 #include <QVector4D>
 
 #include "panel.h"
@@ -10,11 +11,21 @@
 class TriangleWindow;
 #define VBO
 #ifdef VBO
+#if 0
 struct VertexData
 {
     GLfloat vertex[3];
     GLfloat color[4];
 };
+#else
+struct VertexData
+{
+    QVector3D vertex[36];
+    QVector4D color[1][36];
+};
+
+#endif
+
 #endif
 
 class Cube

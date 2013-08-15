@@ -45,38 +45,7 @@ GLuint TriangleWindow::loadShader(GLuint type, const char *source)
 void TriangleWindow::initcube()
 {
     //m_cube = new Cube[m_num];
-#if 1
-    float red[] = {
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-    };
-    float green[] = {
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-    };
-    float blue[] = {
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-    };
-#endif
+
     /* Left squre along AXIS X, X = -1 */
     /*    Y              */
     /*    ^              */
@@ -294,11 +263,13 @@ void TriangleWindow::initshaders()
     m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
 #endif //TEXTURE
 #else //RAW_OPEN
-    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, sizeof(struct VertexData));
+    //m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, sizeof(struct VertexData));
+    m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, 0);
 #ifdef TEXTURE
     m_program->setAttributeArray(m_texcoord, static_cast<GLfloat *>(0), 2);
 #else
-    m_program->setAttributeArray(m_colAttr, (const GLfloat *)(12), 4, sizeof(struct VertexData));
+    //m_program->setAttributeArray(m_colAttr, (const GLfloat *)(12), 4, sizeof(struct VertexData));
+    m_program->setAttributeArray(m_colAttr, (const GLfloat *)(sizeof(QVector3D)*36), 4, 0);
 #endif
 
 #if 1
@@ -499,7 +470,8 @@ void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
 #endif //TEXTURE
 #endif //RAW_OPENGL
 
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (GLvoid *)0);
+    //glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_BYTE, (GLvoid *)0);
+    glDrawArrays(GL_TRIANGLES,0,36);
 
 #ifdef RAW_OPENGL
     glDisableVertexAttribArray(m_posAttr);
@@ -531,12 +503,14 @@ void TriangleWindow::render()
     glViewport(0, 0, w, w);
     //glViewport(0, 0, 1600, 1600);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |  GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glShadeModel(GL_FLAT);
 #ifndef TEXTURE
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH);
     glEnable(GL_BLEND);
 
 #if 0

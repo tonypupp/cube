@@ -3,40 +3,105 @@
 #include "trianglewindow.h"
 
 #ifdef VBO
+#if 0
 VertexData gvertices[] = {
     {
-        {-1.0f, -1.0f, 1.0f,},
+        {-0.5f, -0.5f, 0.5f,},
         { 0.0f,  0.0f, 1.0f, 0.0f,},
     },
     {
-        {1.0f, -1.0f, 1.0f,},
+        {0.5f, -0.5f, 0.5f,},
         {0.0f,  0.0f, 1.0f, 0.0f,},
     },
     {
-        {1.0f, 1.0f, 1.0f,},
+        {0.5f, 0.5f, 0.5f,},
         {0.0f, 0.0f, 1.0f, 0.0f,},
     },
     {
-        {-1.0f, 1.0f, 1.0f,},
+        {-0.5f, 0.5f, 0.5f,},
         { 0.0f, 0.0f, 1.0f, 0.0f,},
     },
     {
-        {-1.0f, -1.0f, -1.0f,},
+        {-0.5f, -0.5f, -0.5f,},
         { 0.0f,  0.0f,  1.0f, 0.0f,},
     },
-     {
-        {1.0f, -1.0f, -1.0f,},
+    {
+        {0.5f, -0.5f, -0.5f,},
         {0.0f,  0.0f,  1.0f, 0.0f,},
     },
     {
-        {1.0f, 1.0f, -1.0f,},
+        {0.5f, 0.5f, -0.5f,},
         {0.0f, 0.0f,  1.0f, 0.0f,},
     },
     {
-        {-1.0f, 1.0f, -1.0f,},
+        {-0.5f, 0.5f, -0.5f,},
         { 0.0f, 0.0f,  1.0f, 0.0f,},
     },
 };
+#else
+struct VertexData gvertices = {
+    /* Vertices */
+    {
+        QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.5f,  0.5f,  0.5f),
+        QVector3D( 0.5f,  0.5f,  0.5f), QVector3D(-0.5f,  0.5f,  0.5f), QVector3D(-0.5f, -0.5f,  0.5f),
+
+        QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 0.5f,  0.5f, -0.5f),
+        QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 0.5f, -0.5f,  0.5f),
+
+        QVector3D(-0.5f, -0.5f, -0.5f), QVector3D(-0.5f, -0.5f,  0.5f), QVector3D(-0.5f,  0.5f,  0.5f),
+        QVector3D(-0.5f,  0.5f,  0.5f), QVector3D(-0.5f,  0.5f, -0.5f), QVector3D(-0.5f, -0.5f, -0.5f),
+
+        QVector3D(-0.5f, -0.5f,  0.5f), QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 0.5f, -0.5f, -0.5f),
+        QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 0.5f, -0.5f,  0.5f), QVector3D(-0.5f, -0.5f,  0.5f),
+
+        QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 0.5f,  0.5f, -0.5f),
+        QVector3D( 0.5f,  0.5f, -0.5f), QVector3D(-0.5f,  0.5f, -0.5f), QVector3D(-0.5f,  0.5f,  0.5f),
+
+        QVector3D( 0.5f, -0.5f, -0.5f), QVector3D(-0.5f, -0.5f, -0.5f), QVector3D(-0.5f,  0.5f, -0.5f),
+        QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 0.5f, -0.5f, -0.5f),
+
+#if 0
+        QVector3D(-0.5f, -0.5f,  0.5f), //v0
+        QVector3D( 0.5f, -0.5f,  0.5f), //v1
+        QVector3D( 0.5f,  0.5f,  0.5f), //v2
+        QVector3D(-0.5f,  0.5f,  0.5f), //v3
+        QVector3D(-0.5f, -0.5f, -0.5f), //v4
+        QVector3D( 0.5f, -0.5f, -0.5f), //v5
+        QVector3D( 0.5f,  0.5f, -0.5f), //v6
+        QVector3D(-0.5f,  0.5f, -0.5f), //v7
+#endif
+    },
+    /* Color */
+    {
+        {
+        /* Red */
+        QVector4D(1.0f, 0.0f, 0.0f, 1.0f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f),
+        QVector4D(1.0f, 0.0f, 0.0f, 1.0f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f), QVector4D(1.0f, 0.0f, 0.0f, 1.0f),
+
+        /* Green */
+        QVector4D(0.0f, 1.0f, 0.0f, 1.0f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f),
+        QVector4D(0.0f, 1.0f, 0.0f, 1.0f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f), QVector4D(0.0f, 1.0f, 0.0f, 1.0f),
+
+        /* Blue */
+        QVector4D(0.0f, 0.0f, 1.0f, 1.0f), QVector4D(0.0f, 0.0f, 1.0f, 1.0f), QVector4D(0.0f, 0.0f, 1.0f, 1.0f),
+        QVector4D(0.0f, 0.0f, 1.0f, 1.0f), QVector4D(0.0f, 0.0f, 1.0f, 1.0f), QVector4D(0.0f, 0.0f, 1.0f, 1.0f),
+
+        /* cyan */
+        QVector4D(0.0f, 1.0f, 1.0f, 1.0f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f),
+        QVector4D(0.0f, 1.0f, 1.0f, 1.0f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f), QVector4D(0.0f, 1.0f, 1.0f, 1.0f),
+
+        /* white */
+        QVector4D(1.0f, 1.0f, 1.0f, 1.0f), QVector4D(1.0f, 1.0f, 1.0f, 1.0f), QVector4D(1.0f, 1.0f, 1.0f, 1.0f),
+        QVector4D(1.0f, 1.0f, 1.0f, 1.0f), QVector4D(1.0f, 1.0f, 1.0f, 1.0f), QVector4D(1.0f, 1.0f, 1.0f, 1.0f),
+
+        /* Yellow */
+        QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f),
+        QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f),
+        },
+    },
+
+};
+#endif
 
 #else
 GLfloat gvertices[] = {
@@ -63,11 +128,7 @@ GLfloat gcolors[] = {
 #endif //VBO
 
 GLubyte gindices[] = {
-#if 0
-    1,2,3, 1,2,3,
-#else
     0,1,2, 2,3,0, //front side
-#endif
     1,5,6, 6,2,1, //right side
     4,0,3, 3,7,4, //left side
     0,4,5, 5,1,0, //bottom side
@@ -150,7 +211,7 @@ GLuint Cube::getvertices(struct VertexData **vertices)
 GLuint Cube::getvertices(GLfloat **vertices)
 #endif
 {
-    *vertices = &gvertices[0];
+    *vertices = &gvertices;
     return sizeof(gvertices);
 }
 
