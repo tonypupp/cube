@@ -6,27 +6,22 @@
 #include <QVector3D>
 #include <QVector4D>
 
+#include "global.h"
 #include "panel.h"
 
-class TriangleWindow;
-#define VBO
 #ifdef VBO
-#if 0
-struct VertexData
-{
-    GLfloat vertex[3];
-    GLfloat color[4];
-};
-#else
 struct VertexData
 {
     QVector3D vertex[36];
+#ifdef TEXTURE
+    QVector3D texcoord[36];
+#else
     QVector4D color[1][36];
+#endif
 };
-
 #endif
 
-#endif
+class TriangleWindow;
 
 class Cube
 {

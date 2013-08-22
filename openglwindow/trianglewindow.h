@@ -9,15 +9,14 @@
 #include <QTimer>
 #include <QList>
 
+#include "global.h"
+
 #include "cube.h"
 #include "panel.h"
 
 class QTimer;
 class QMouseEvent;
 
-#define VBO
-//#define RAW_OPENGL
-//#define TEXTURE
 class TriangleWindow : public OpenGLWindow
 {
 
@@ -45,7 +44,7 @@ private:
     GLuint m_colAttr;
     GLuint m_matrixUniform;
 
-    GLuint m_vbo[2];
+    GLuint m_vbo;
     GLuint m_elementbuffer;
     //GLuint m_color;
     GLuint m_texcoord;

@@ -12,7 +12,8 @@ HEADERS += \
     openglwindow.h \
     trianglewindow.h \
     cube.h \
-    panel.h
+    panel.h \
+    global.h
 
 SOURCES += \
     openglwindow.cpp \

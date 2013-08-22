@@ -3,42 +3,6 @@
 #include "trianglewindow.h"
 
 #ifdef VBO
-#if 0
-VertexData gvertices[] = {
-    {
-        {-0.5f, -0.5f, 0.5f,},
-        { 0.0f,  0.0f, 1.0f, 0.0f,},
-    },
-    {
-        {0.5f, -0.5f, 0.5f,},
-        {0.0f,  0.0f, 1.0f, 0.0f,},
-    },
-    {
-        {0.5f, 0.5f, 0.5f,},
-        {0.0f, 0.0f, 1.0f, 0.0f,},
-    },
-    {
-        {-0.5f, 0.5f, 0.5f,},
-        { 0.0f, 0.0f, 1.0f, 0.0f,},
-    },
-    {
-        {-0.5f, -0.5f, -0.5f,},
-        { 0.0f,  0.0f,  1.0f, 0.0f,},
-    },
-    {
-        {0.5f, -0.5f, -0.5f,},
-        {0.0f,  0.0f,  1.0f, 0.0f,},
-    },
-    {
-        {0.5f, 0.5f, -0.5f,},
-        {0.0f, 0.0f,  1.0f, 0.0f,},
-    },
-    {
-        {-0.5f, 0.5f, -0.5f,},
-        { 0.0f, 0.0f,  1.0f, 0.0f,},
-    },
-};
-#else
 struct VertexData gvertices = {
     /* Vertices */
     {
@@ -60,7 +24,7 @@ struct VertexData gvertices = {
         QVector3D( 0.5f, -0.5f, -0.5f), QVector3D(-0.5f, -0.5f, -0.5f), QVector3D(-0.5f,  0.5f, -0.5f),
         QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 0.5f, -0.5f, -0.5f),
 
-#if 0
+/*
         QVector3D(-0.5f, -0.5f,  0.5f), //v0
         QVector3D( 0.5f, -0.5f,  0.5f), //v1
         QVector3D( 0.5f,  0.5f,  0.5f), //v2
@@ -69,8 +33,30 @@ struct VertexData gvertices = {
         QVector3D( 0.5f, -0.5f, -0.5f), //v5
         QVector3D( 0.5f,  0.5f, -0.5f), //v6
         QVector3D(-0.5f,  0.5f, -0.5f), //v7
-#endif
+*/
     },
+#ifdef TEXTURE
+    /* Texture coordinator */
+    {
+        QVector3D(-0.5f, -0.5f,  0.5f), QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.5f,  0.5f,  0.5f),
+        QVector3D( 0.5f,  0.5f,  0.5f), QVector3D(-0.5f,  0.5f,  0.5f), QVector3D(-0.5f, -0.5f,  0.5f),
+
+        QVector3D( 0.5f, -0.5f,  0.5f), QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 0.5f,  0.5f, -0.5f),
+        QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 0.5f, -0.5f,  0.5f),
+
+        QVector3D(-0.5f, -0.5f, -0.5f), QVector3D(-0.5f, -0.5f,  0.5f), QVector3D(-0.5f,  0.5f,  0.5f),
+        QVector3D(-0.5f,  0.5f,  0.5f), QVector3D(-0.5f,  0.5f, -0.5f), QVector3D(-0.5f, -0.5f, -0.5f),
+
+        QVector3D(-0.5f, -0.5f,  0.5f), QVector3D(-0.5f, -0.5f, -0.5f), QVector3D( 0.5f, -0.5f, -0.5f),
+        QVector3D( 0.5f, -0.5f, -0.5f), QVector3D( 0.5f, -0.5f,  0.5f), QVector3D(-0.5f, -0.5f,  0.5f),
+
+        QVector3D(-0.5f,  0.5f,  0.5f), QVector3D( 0.5f,  0.5f,  0.5f), QVector3D( 0.5f,  0.5f, -0.5f),
+        QVector3D( 0.5f,  0.5f, -0.5f), QVector3D(-0.5f,  0.5f, -0.5f), QVector3D(-0.5f,  0.5f,  0.5f),
+
+        QVector3D( 0.5f, -0.5f, -0.5f), QVector3D(-0.5f, -0.5f, -0.5f), QVector3D(-0.5f,  0.5f, -0.5f),
+        QVector3D(-0.5f,  0.5f, -0.5f), QVector3D( 0.5f,  0.5f, -0.5f), QVector3D( 0.5f, -0.5f, -0.5f),
+    },
+#else
     /* Color */
     {
         {
@@ -99,9 +85,8 @@ struct VertexData gvertices = {
         QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f), QVector4D(1.0f, 1.0f, 0.0f, 1.0f),
         },
     },
-
-};
 #endif
+};
 
 #else
 GLfloat gvertices[] = {

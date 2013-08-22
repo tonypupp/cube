@@ -174,32 +174,46 @@ void TriangleWindow::initpanel(int cube_map[][9])
 
 void TriangleWindow::inittexture()
 {
-    glEnable(GL_TEXTURE_2D);
-    //QImage tex(":/cube.png");
-    QImage texture("../openglwindow/red_640x640.png");
-    if (texture.isNull()) {
-        return;
-    }
-    //QImage texture(tex.convertToFormat(QImage::Format_RGB888));
-    //QImage texture(tex);
+    const char *CubeFace[] = {
+        "../openglwindow/red_640x640.png",
+        "../openglwindow/green_640x640.png",
+        "../openglwindow/blue_640x640.png",
+        "../openglwindow/cyan_640x640.png",
+        "../openglwindow/white_640x640.png",
+        "../openglwindow/yellow_640x640.png",
+    };
 
-    GLsizei width = texture.width();
-    GLsizei height = texture.height();
-    const GLvoid *pixels = texture.bits();
+    GLenum face[] = {
+      GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+      GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+    };
 
     glGenTextures(1, &m_texture);
     if (m_texture == 0)
         ;
     else {
-        glBindTexture(GL_TEXTURE_2D, m_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height,
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    }
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        for (int i = 0; i < 6; i++) {
+            QImage texture(CubeFace[i]);
+            texture = texture.convertToFormat(QImage::Format_ARGB32);
+            GLsizei width = texture.width();
+            GLsizei height = texture.height();
+            const GLvoid *pixels = texture.bits();
+
+            glTexImage2D(face[i], 0, 4, width, height,
+                     0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+        }
+    }
 }
 
 void TriangleWindow::initshaders()
@@ -221,58 +235,45 @@ void TriangleWindow::initshaders()
     m_program->bind();
 
     m_posAttr = m_program->attributeLocation("posAttr");
-#ifndef TEXTURE
-    m_colAttr = m_program->attributeLocation("colAttr");
-#else
+#ifdef TEXTURE
     m_texcoord = m_program->attributeLocation("qt_MultiTexCoord0");
+    m_program->setUniformValue("qt_Texture0", 0);
+#else
+    m_colAttr = m_program->attributeLocation("colAttr");
 #endif
     m_matrixUniform = m_program->uniformLocation("matrix");
 
 #ifdef VBO
-    glGenBuffers(2, m_vbo);
-    if (m_vbo[0] == 0)
+    glGenBuffers(1, &m_vbo);
+    if (m_vbo == 0)
         ;
     else {
         GLuint size;
         struct VertexData *vertices;
 
         size = Cube::getvertices(&vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
         glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
     }
 
-#ifdef TEXTURE
-    if (m_vbo[1] == 0)
-        ;
-    else {
-        GLuint size;
-        QVector2D *texcoord;
-
-        size = Cube::gettexcoords(&texcoord);
-        glBindBuffer(GL_ARRAY_BUFFER, m_vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, size, texcoord, GL_STATIC_DRAW);
-
-    }
-#endif
-
 #ifdef RAW_OPENGL
-    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, sizeof(struct VertexData), static_cast<GLfloat *>(0));
-#ifndef TEXTURE
-    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, sizeof(struct VertexData), (const void *)(sizeof(GLfloat)*3));
+    glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
+#ifdef TEXTURE
+    glVertexAttribPointer(m_texcoord, 3, GL_FLOAT, GL_FALSE, 0, (const void *)(sizeof(struct QVector3D)*36));
 #else
-    m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
+    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, (const void *)(sizeof(QVector3D)*36));
 #endif //TEXTURE
+
 #else //RAW_OPEN
-    //m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, sizeof(struct VertexData));
     m_program->setAttributeArray(m_posAttr, static_cast<GLfloat *>(0), 3, 0);
 #ifdef TEXTURE
-    m_program->setAttributeArray(m_texcoord, static_cast<GLfloat *>(0), 2);
+    m_program->setAttributeArray(m_texcoord, (const GLfloat *)(sizeof(QVector3D)*36), 3, 0);
 #else
-    //m_program->setAttributeArray(m_colAttr, (const GLfloat *)(12), 4, sizeof(struct VertexData));
     m_program->setAttributeArray(m_colAttr, (const GLfloat *)(sizeof(QVector3D)*36), 4, 0);
 #endif
+#endif //RAW_OPEN
 
-#if 1
+#else //VBO
     glGenBuffers(1, &m_elementbuffer);
     if (m_elementbuffer == 0)
         ;
@@ -284,28 +285,8 @@ void TriangleWindow::initshaders()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
     }
-#endif
-#endif //RAW_OPEN
+
 /*
-    glGenBuffers(1, &m_color);
-    if (m_color == 0)
-        ;
-    else{
-        GLuint size;
-        GLfloat *color;
-
-        size = Cube::getcolors(&color);
-        glBindBuffer(GL_ARRAY_BUFFER, m_color);
-        glBufferData(GL_ARRAY_BUFFER, size, color, GL_STATIC_DRAW);
-    }
-
-
-#ifdef RAW_OPENGL
-    glVertexAttribPointer(m_colAttr, 4, GL_FLOAT, GL_FALSE, 0, static_cast<GLfloat *>(0));
-#else
-    //m_program->setAttributeArray(m_colAttr, static_cast<GLfloat *>(0), 4);
-#endif
-
     glGenBuffers(1, &m_feedbackbuffer);
     if (m_feedbackbuffer == 0)
         ;
@@ -423,7 +404,61 @@ void TriangleWindow::roundpanel()
             m_panel[i].rotatend(this);
 }
 
-#ifndef VBO
+#ifdef VBO
+void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
+{
+    QMatrix4x4 modeview = matrix * cube.getmatrix();
+    m_program->setUniformValue(m_matrixUniform, modeview);
+#ifdef TEXTURE
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+    glEnable(GL_TEXTURE_CUBE_MAP);
+    //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    m_program->setUniformValue("qt_Texture0", 0);
+#endif
+
+#ifdef RAW_OPENGL
+    glEnableVertexAttribArray(m_posAttr);
+#ifdef TEXTURE
+    glEnableVertexAttribArray(m_texcoord);
+#else
+    glEnableVertexAttribArray(m_colAttr);
+#endif
+#else //RAW_OPENGL
+    m_program->enableAttributeArray(m_posAttr);
+#ifdef TEXTURE
+    m_program->enableAttributeArray(m_texcoord);
+#else
+    m_program->enableAttributeArray(m_colAttr);
+#endif
+#endif //RAW_OPENGL
+
+    //glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_BYTE, (GLvoid *)0);
+    glDrawArrays(GL_TRIANGLES,0,36);
+
+#ifdef RAW_OPENGL
+    glDisableVertexAttribArray(m_posAttr);
+#ifdef TEXTURE
+    glDisableVertexAttribArray(m_texcoord);
+#else
+    glDisableVertexAttribArray(m_colAttr);
+#endif
+#else //RAW_OPENGL
+    m_program->disableAttributeArray(m_posAttr);
+#ifdef TEXTURE
+    m_program->disableAttributeArray(m_texcoord);
+#else
+    m_program->disableAttributeArray(m_colAttr);
+#endif
+#endif //RAW_OPENGL
+
+#ifdef TEXTURE
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+#endif
+}
+#else
 void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
 {
     QMatrix4x4 modeview = matrix * cube.getmatrix();
@@ -451,47 +486,13 @@ void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
     m_program->disableAttributeArray(m_colAttr);
 #endif
 }
-
-#else
-void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
-{
-    QMatrix4x4 modeview = matrix * cube.getmatrix();
-    m_program->setUniformValue(m_matrixUniform, modeview);
-
-#ifdef RAW_OPENGL
-    glEnableVertexAttribArray(m_posAttr);
-    glEnableVertexAttribArray(m_colAttr);
-#else
-    m_program->enableAttributeArray(m_posAttr);
-#ifdef TEXTURE
-    m_program->enableAttributeArray(m_texcoord);
-#else
-    m_program->enableAttributeArray(m_colAttr);
-#endif //TEXTURE
-#endif //RAW_OPENGL
-
-    //glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_BYTE, (GLvoid *)0);
-    glDrawArrays(GL_TRIANGLES,0,36);
-
-#ifdef RAW_OPENGL
-    glDisableVertexAttribArray(m_posAttr);
-    glDisableVertexAttribArray(m_colAttr);
-#else
-    m_program->disableAttributeArray(m_posAttr);
-#ifdef TEXTURE
-    m_program->disableAttributeArray(m_texcoord);
-#else
-    m_program->disableAttributeArray(m_colAttr);
-#endif //TEXTURE
-#endif //RAW_OPENGL
-}
 #endif //VBO
 
 void TriangleWindow::render()
 {
     int i;
     const qreal retinaScale = devicePixelRatio();
-#if 0
+#if 1
     int w = ((width () > height()) ? height() : width()) * retinaScale;
 #else
     int w = width();
@@ -501,17 +502,12 @@ void TriangleWindow::render()
     static Panel *panel = &m_panel[AXIS_Z1];
 
     glViewport(0, 0, w, w);
-    //glViewport(0, 0, 1600, 1600);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glShadeModel(GL_FLAT);
+    glEnable(GL_DEPTH_TEST);
 #ifndef TEXTURE
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glEnable(GL_DEPTH);
-    glEnable(GL_BLEND);
 
 #if 0
     m_view.rotate(5.0f * m_frame / screen()->refreshRate(), 0, 1, 0);
@@ -534,7 +530,6 @@ void TriangleWindow::render()
         panel->rotate(5);
     }
 
-    //for (i = 0; i < m_num; i++) {
     for (i = 0; i < m_num; i++) {
         drawcube(m_cube[i], m_view);
     }
