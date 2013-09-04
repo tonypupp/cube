@@ -175,12 +175,21 @@ void TriangleWindow::initpanel(int cube_map[][9])
 void TriangleWindow::inittexture()
 {
     const char *CubeFace[] = {
+    #if 1
         "../openglwindow/red_640x640.png",
         "../openglwindow/green_640x640.png",
         "../openglwindow/blue_640x640.png",
         "../openglwindow/cyan_640x640.png",
         "../openglwindow/white_640x640.png",
         "../openglwindow/yellow_640x640.png",
+    #else
+        "/home/digia/Work/tmp/boxes/cubemap_posx.jpg",
+        "/home/digia/Work/tmp/boxes/cubemap_negx.jpg",
+        "/home/digia/Work/tmp/boxes/cubemap_posy.jpg",
+        "/home/digia/Work/tmp/boxes/cubemap_negy.jpg",
+        "/home/digia/Work/tmp/boxes/cubemap_posz.jpg",
+        "/home/digia/Work/tmp/boxes/cubemap_negz.jpg",
+    #endif
     };
 
     GLenum face[] = {
@@ -196,6 +205,7 @@ void TriangleWindow::inittexture()
     if (m_texture == 0)
         ;
     else {
+        //glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -210,8 +220,13 @@ void TriangleWindow::inittexture()
             GLsizei height = texture.height();
             const GLvoid *pixels = texture.bits();
 
+#if 0
             glTexImage2D(face[i], 0, 4, width, height,
                      0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+#else
+            glTexImage2D(face[i], 0, 4, width, height,
+                     0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+#endif
         }
     }
 }
@@ -410,7 +425,7 @@ void TriangleWindow::drawcube(Cube &cube, QMatrix4x4 &matrix)
     QMatrix4x4 modeview = matrix * cube.getmatrix();
     m_program->setUniformValue(m_matrixUniform, modeview);
 #ifdef TEXTURE
-    glActiveTexture(GL_TEXTURE0);
+    //glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
     glEnable(GL_TEXTURE_CUBE_MAP);
     //glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
